@@ -48,7 +48,7 @@ name as the second parameter.
 When using kgo (https://www.npmjs.org/package/kgo) this is especially convenient.
 
     kgo
-    ('account', Account.cps.find({where: {id: 1}}))
+    ('account', Account.cps.find.bind(null, {where: {id: 1}}))
     ('update', ['account'], function(account, done) {
         account.name = 'John';
         account.cps.save(done);
