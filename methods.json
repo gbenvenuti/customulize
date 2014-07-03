@@ -1,4 +1,4 @@
 {
-    "class": ["find", "findAll", "update", "create", "count", "aggregate", "max", "min"],
-    "instance": ["save", "reload"]
+    "class": ["find", "findAll", "update", "create", "count", "findAndCountAll", "aggregate", "max", "min", "sum", "create", "drop", "findOrInitialize", "findOrCreate", "bulkCreate", "destroy", "describe"],
+    "instance": ["save", "reload", "validate", "updateAttributes", "destroy", "increment", "decrement"]
 }

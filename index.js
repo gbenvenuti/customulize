@@ -2,33 +2,29 @@ var methodNames = require('./methods');
 
 function addCustomMethods(model, propertyName, createCustomFunction) {
 
+    function getter(methodNames) {
+        var modelInstance = this;
+        if (!this[privateGetKey]) {
+            this[privateGetKey] = {};
+
+            methodNames.forEach(function(method) {
+                modelInstance[privateGetKey][method] = createCustomFunction(modelInstance, method);
+            });
+        }
+        return this[privateGetKey];
+    }
+
     var privateGetKey = '__' + propertyName;
 
     Object.defineProperty(model, propertyName, {
         get: function() {
-            var modelInstance = this;
-            if (!this[privateGetKey]) {
-                this[privateGetKey] = {};
-
-                methodNames.class.forEach(function(method) {
-                    modelInstance[privateGetKey][method] = createCustomFunction(modelInstance, method);
-                });
-            }
-            return this[privateGetKey];
+            return getter.call(this, methodNames.class);
         }
     });
 
     Object.defineProperty(model.DAO.prototype, propertyName, {
         get: function() {
-            var modelInstance = this;
-            if (!this[privateGetKey]) {
-                this[privateGetKey] = {};
-
-                methodNames.instance.forEach(function(method) {
-                    modelInstance[privateGetKey][method] = createCustomFunction(modelInstance, method);
-                });
-            }
-            return this[privateGetKey];
+            return getter.call(this, methodNames.instance);
         }
     });
 }

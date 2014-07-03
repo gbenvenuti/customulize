@@ -68,7 +68,7 @@ function runTests(test, propertyName, testFunction, successTest, errorTest){
 
     test('multi model', function (t) {
         var customulize = getCleanTestObject(),
-            modelNames = ['Account', 'User', 'Site', 'Page'],
+            modelNames = ['Account', 'User'],
             models = createModels(modelNames);
 
         customulize(propertyName, testFunction)(models);

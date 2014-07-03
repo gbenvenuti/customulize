@@ -1,6 +1,6 @@
 var test = require('grape'),
     propertyName = 'fakeProp',
-    runTests = require('./core');
+    runTests = require('./runTests');
 
 function successTest(t, model, method) {
     model[propertyName][method](null, true).complete(function(error, result) {
