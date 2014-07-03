@@ -1,6 +1,6 @@
 {
   "name": "sequelize-cps",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Add CPS, error-first callbacks to sequelize",
   "main": "index.js",
   "scripts": {
