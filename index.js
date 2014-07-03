@@ -1,34 +1,34 @@
 var methodNames = require('./methods');
 
-function addLazyCps(model, lazyProperty, createCustomFunction) {
+function addCustomMethods(model, lazyProperty, createCustomFunction) {
+
+    var privateGetKey = '__' + lazyProperty;
 
     Object.defineProperty(model, lazyProperty, {
         get: function() {
-            var instance = this;
-            if (!this.__cpsGet) {
-                var _model = this;
-                this.__cpsGet = {};
+            var modelInstance = this;
+            if (!this[privateGetKey]) {
+                this[privateGetKey] = {};
 
                 methodNames.class.forEach(function(method) {
-                    _model.__cpsGet[method] = createCustomFunction(_model, method);
+                    modelInstance[privateGetKey][method] = createCustomFunction(modelInstance, method);
                 });
             }
-            return this.__cpsGet;
+            return this[privateGetKey];
         }
     });
 
     Object.defineProperty(model.DAO.prototype, lazyProperty, {
         get: function() {
-            var instance = this;
-            if (!this.__cpsGet) {
-                var _model = this;
-                this.__cpsGet = {};
+            var modelInstance = this;
+            if (!this[privateGetKey]) {
+                this[privateGetKey] = {};
 
                 methodNames.instance.forEach(function(method) {
-                    _model.__cpsGet[method] = createCustomFunction(_model, method);
+                    modelInstance[privateGetKey][method] = createCustomFunction(modelInstance, method);
                 });
             }
-            return this.__cpsGet;
+            return this[privateGetKey];
         }
     });
 }
@@ -45,7 +45,7 @@ module.exports = function(propertyName, createCustomFunction){
             if (!models[key].DAO) {
                 throw new Error('Not a sequelize model');
             }
-            addLazyCps(models[key], propertyName, createCustomFunction);
+            addCustomMethods(models[key], propertyName, createCustomFunction);
         }
     };
 }
