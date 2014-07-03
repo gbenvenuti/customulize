@@ -1,2 +1,2 @@
-sequelize-cps
-=============
+#sequelize-cps
+

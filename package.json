@@ -1,0 +1,29 @@
+{
+  "name": "sequelize-cps",
+  "version": "0.0.0",
+  "description": "Add CPS, error-first callbacks to sequelize",
+  "main": "index.js",
+  "scripts": {
+    "test": "node tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/gbenvenuti/sequelize-cps.git"
+  },
+  "keywords": [
+    "sequelize",
+    "cps",
+    "error-first",
+    "callback"
+  ],
+  "author": "gbenvenuti",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/gbenvenuti/sequelize-cps/issues"
+  },
+  "homepage": "https://github.com/gbenvenuti/sequelize-cps",
+  "devDependencies": {
+    "grape": "^1.0.0",
+    "mockery": "^1.4.0"
+  }
+}
