@@ -1,10 +1,10 @@
 var methodNames = require('./methods');
 
-function addCustomMethods(model, lazyProperty, createCustomFunction) {
+function addCustomMethods(model, propertyName, createCustomFunction) {
 
-    var privateGetKey = '__' + lazyProperty;
+    var privateGetKey = '__' + propertyName;
 
-    Object.defineProperty(model, lazyProperty, {
+    Object.defineProperty(model, propertyName, {
         get: function() {
             var modelInstance = this;
             if (!this[privateGetKey]) {
@@ -18,7 +18,7 @@ function addCustomMethods(model, lazyProperty, createCustomFunction) {
         }
     });
 
-    Object.defineProperty(model.DAO.prototype, lazyProperty, {
+    Object.defineProperty(model.DAO.prototype, propertyName, {
         get: function() {
             var modelInstance = this;
             if (!this[privateGetKey]) {
@@ -48,4 +48,4 @@ module.exports = function(propertyName, createCustomFunction){
             addCustomMethods(models[key], propertyName, createCustomFunction);
         }
     };
-}
+};
