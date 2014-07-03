@@ -1,5 +1,5 @@
 var test = require('grape'),
-    pathToObjectUnderTest = '../index',
+    pathToObjectUnderTest = './sequelazy',
     methodNames = require('../methods'),
     SequelizeEventEmitter = require('./sequelizeEventEmitter');
 
@@ -45,11 +45,11 @@ function classMethodTester(t, model) {
 
     methodNames.class.forEach(function(method) {
 
-        model.cps[method](null, true, function(error, result) {
+        model.lazy[method](null, true)(function(error, result) {
             t.equal(result, true, method + ' success ok');
         });
 
-        model.cps[method]('bad', function(error) {
+        model.lazy[method]('bad')(function(error) {
             t.equal(error, 'bad', method + ' error ok');
         });
 
@@ -60,29 +60,29 @@ function instanceMethodTester(t, model) {
     t.plan(methodNames.instance.length * 2);
 
     methodNames.instance.forEach(function(method) {
-        model.cps[method](null, true, function(error, result) {
+        model.lazy[method](null, true)(function(error, result) {
             t.equal(result, true, method + ' success ok');
         });
 
-        model.cps[method]('bad', function(error) {
+        model.lazy[method]('bad')(function(error) {
             t.equal(error, 'bad', method + ' error ok');
         });
     });
 }
 
-test('sequelize-cps Exists', function (t) {
+test('sequelize-lazy Exists', function (t) {
     t.plan(2);
-    var sequelizeCps = getCleanTestObject();
-    t.ok(sequelizeCps, 'Exists');
-    t.equal(typeof sequelizeCps, 'function',  'sequelizeCps is a function');
+    var sequelizeLazy = getCleanTestObject();
+    t.ok(sequelizeLazy, 'Exists');
+    t.equal(typeof sequelizeLazy, 'function',  'sequelizeLazy is a function');
 });
 
 test('multi model', function (t) {
-    var sequelizeCps = getCleanTestObject(),
+    var sequelizeLazy = getCleanTestObject(),
         modelNames = ['Account', 'User', 'Site', 'Page'],
         models = createModels(modelNames);
 
-    sequelizeCps(models);
+    sequelizeLazy(models);
 
     modelNames.forEach(function(modelName) {
         test('testing classMethod success/error for model ' + modelName, function(t) {
@@ -97,10 +97,10 @@ test('multi model', function (t) {
 });
 
 test('single model', function (t) {
-    var sequelizeCps = getCleanTestObject(),
+    var sequelizeLazy = getCleanTestObject(),
         model = new SequelizeModel();
 
-    sequelizeCps(model);
+    sequelizeLazy(model);
 
     test('testing classMethod success/error for single model ', function(t) {
         classMethodTester(t, model);
@@ -111,38 +111,15 @@ test('single model', function (t) {
     });
 });
 
-test('works with a custom property name', function (t) {
-    t.plan(4);
-    var sequelizeCps = getCleanTestObject(),
-        property = 'myProperty',
-        model = new SequelizeModel();
-
-    sequelizeCps(model, property);
-
-    model[property].find(null, true, function(error, result) {
-        t.equal(result, true, 'class success ok');
-    });
-    model[property].find('bad', function(error) {
-        t.equal(error, 'bad', 'class error ok');
-    });
-
-    model.DAOInstance[property].save(null, true, function(error, result) {
-        t.equal(result, true, 'instance success ok');
-    });
-    model.DAOInstance[property].save('bad', function(error) {
-        t.equal(error, 'bad', 'instance error ok');
-    });
-});
-
 test('errors with a invalid model', function (t) {
     t.plan(2);
-    var sequelizeCps = getCleanTestObject();
+    var sequelizeLazy = getCleanTestObject();
 
     t.throws(function() {
-        sequelizeCps({});
+        sequelizeLazy({});
     }, 'got an exception on empty object');
 
     t.throws(function() {
-        sequelizeCps({ my: 'property'});
+        sequelizeLazy({ my: 'property'});
     }, 'got an exception on non empty object');
 });

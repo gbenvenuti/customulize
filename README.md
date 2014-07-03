@@ -1,19 +1,22 @@
-#sequelize-cps
+#customulize
 
-Adds CPS functionality to sequelize for cases when __.complete, .success, .save__
-just aren't for you.
-
-CPS - http://en.wikipedia.org/wiki/Continuation-passing_style
-
-Error First - http://fredkschott.com/post/2014/03/understanding-error-first-callbacks-in-node-js/
+Add arbitrary custom functions to sequelize models
 
 ##Installation
 
-    npm install sequelize-cps
+    npm install customulize
 
 ##usage
 
-    var sequelizeCps = require('sequelize-cps'),
+    var customulize = require('customulize');
+
+    var sequelizeCps = customulize('cps', function(model, method) {
+        return function() {
+            var newArgs = Array.prototype.slice.call(arguments),
+                callback = newArgs.pop();
+            model[method].apply(model, newArgs).complete(callback);
+        };
+    });
 
     // define your sequelize models
     var models = {
@@ -34,24 +37,25 @@ Error First - http://fredkschott.com/post/2014/03/understanding-error-first-call
         });
     });
 
-###custom accessor name
-If you'd rather not use cps as a name, make your own, simply call it with the accessor
-name as the second parameter.
-
-    sequelizeCps(models, 'WIN');
-
-    models.Account.WIN.find(...)
-
-    account.WIN.save()
-
 ##kgo
-When using kgo (https://www.npmjs.org/package/kgo) this is especially convenient.
+
+customulize allows you to create a lazy calling pattern, eg:
+
+    var sequelazy = customulize('lazy', function(model, method) {
+        return function() {
+            var query = model[method].apply(model, arguments);
+            return query.complete.bind(query);
+        };
+    });
+
+When using [kgo](https://www.npmjs.org/package/kgo) this is especially convenient:
 
     kgo
-    ('account', Account.cps.find.bind(null, {where: {id: 1}}))
+    ('account', Account.lazy.find({where: {id: 1}}))
     ('update', ['account'], function(account, done) {
         account.name = 'John';
         account.cps.save(done);
     })
     // etc, etc, etc
+
 Pull requests welcome with passing tests.
