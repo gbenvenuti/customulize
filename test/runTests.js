@@ -1,6 +1,7 @@
 var pathToObjectUnderTest = '../index',
     methodNames = require('../methods'),
-    SequelizeEventEmitter = require('./sequelizeEventEmitter');
+    SequelizeEventEmitter = require('./sequelizeEventEmitter'),
+    SequelizePromise = require('./sequelizePromise');
 
 function getCleanTestObject(){
     delete require.cache[require.resolve(pathToObjectUnderTest)];
@@ -17,20 +18,28 @@ function emitterCreate() {
     };
 }
 
-function runTests(test, propertyName, testFunction, successTest, errorTest){
+function promiseCreate() {
+    return function() {
+        var newArgs = Array.prototype.slice.call(arguments);
+        return new SequelizePromise(function(promise) {
+            return promise.done.apply(promise, newArgs);
+        });
+    };
+}
 
+function runTests(test, propertyName, testFunction, successTest, errorTest, entityCreate){
     function SequelizeModel() {
         var model = this;
         this.DAO = function(){};
 
         methodNames.instance.forEach(function(method) {
-            model.DAO.prototype[method] = emitterCreate();
+            model.DAO.prototype[method] = entityCreate();
         });
 
         this.DAOInstance = new this.DAO();
     }
     methodNames.class.forEach(function(method) {
-        SequelizeModel.prototype[method] = emitterCreate();
+        SequelizeModel.prototype[method] = entityCreate();
     });
 
     function createModels(names) {
@@ -66,7 +75,7 @@ function runTests(test, propertyName, testFunction, successTest, errorTest){
         t.equal(typeof customulize, 'function',  'customulize is a function');
     });
 
-    test('multi model', function (t) {
+    test('multi model', function () {
         var customulize = getCleanTestObject(),
             modelNames = ['Account', 'User'],
             models = createModels(modelNames);
@@ -85,7 +94,7 @@ function runTests(test, propertyName, testFunction, successTest, errorTest){
 
     });
 
-    test('single model', function (t) {
+    test('single model', function () {
         var customulize = getCleanTestObject(),
             model = new SequelizeModel();
 
@@ -102,17 +111,28 @@ function runTests(test, propertyName, testFunction, successTest, errorTest){
 
     test('errors with a invalid model', function (t) {
         t.plan(2);
+
         var customulize = getCleanTestObject()(propertyName, testFunction);
 
-
         t.throws(function() {
-            sequelizeFake({});
+            customulize({});
         }, 'got an exception on empty object');
 
         t.throws(function() {
-            sequelizeFake({ my: 'property'});
+            customulize({ my: 'property'});
         }, 'got an exception on non empty object');
     });
 }
 
-module.exports = runTests;
+function runTestsSequelizeV1(test, propertyName, testFunction, successTest, errorTest){
+    runTests(test, propertyName, testFunction, successTest, errorTest, emitterCreate);
+}
+
+function runTestsSequelizeV2(test, propertyName, testFunction, successTest, errorTest){
+    runTests(test, propertyName, testFunction, successTest, errorTest, promiseCreate);
+}
+
+module.exports = {
+    sequelizeV1: runTestsSequelizeV1,
+    sequelizeV2: runTestsSequelizeV2
+};
