@@ -1,6 +1,6 @@
 {
   "name": "customulize",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Add arbitrary custom callbacks to sequelize",
   "main": "index.js",
   "scripts": {
