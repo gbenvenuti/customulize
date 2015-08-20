@@ -27,16 +27,16 @@ function promiseCreate() {
     };
 }
 
-function runTests(test, propertyName, testFunction, successTest, errorTest, entityCreate){
+function runTests(test, propertyName, testFunction, successTest, errorTest, entityCreate, instanceProperty){
     function SequelizeModel() {
         var model = this;
-        this.DAO = function(){};
+        this[instanceProperty] = function(){};
 
         methodNames.instance.forEach(function(method) {
-            model.DAO.prototype[method] = entityCreate();
+            model[instanceProperty].prototype[method] = entityCreate();
         });
 
-        this.DAOInstance = new this.DAO();
+        this.DAOInstance = new this[instanceProperty]();
     }
     methodNames.class.forEach(function(method) {
         SequelizeModel.prototype[method] = entityCreate();
@@ -125,14 +125,19 @@ function runTests(test, propertyName, testFunction, successTest, errorTest, enti
 }
 
 function runTestsSequelizeV1(test, propertyName, testFunction, successTest, errorTest){
-    runTests(test, propertyName, testFunction, successTest, errorTest, emitterCreate);
+    runTests(test, propertyName, testFunction, successTest, errorTest, emitterCreate, 'DAO');
 }
 
 function runTestsSequelizeV2(test, propertyName, testFunction, successTest, errorTest){
-    runTests(test, propertyName, testFunction, successTest, errorTest, promiseCreate);
+    runTests(test, propertyName, testFunction, successTest, errorTest, promiseCreate, 'DAO');
+}
+
+function runTestsSequelizeV3(test, propertyName, testFunction, successTest, errorTest){
+    runTests(test, propertyName, testFunction, successTest, errorTest, promiseCreate, 'Instance');
 }
 
 module.exports = {
     sequelizeV1: runTestsSequelizeV1,
-    sequelizeV2: runTestsSequelizeV2
+    sequelizeV2: runTestsSequelizeV2,
+    sequelizeV3: runTestsSequelizeV3
 };

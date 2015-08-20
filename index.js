@@ -22,23 +22,32 @@ function addCustomMethods(model, propertyName, createCustomFunction) {
         }
     });
 
-    Object.defineProperty(model.DAO.prototype, propertyName, {
-        get: function() {
-            return getter.call(this, methodNames.instance);
-        }
-    });
+
+    if(model.DAO) {
+        Object.defineProperty(model.DAO.prototype, propertyName, {
+            get: function() {
+                return getter.call(this, methodNames.instance);
+            }
+        });
+    } else {
+        Object.defineProperty(model.Instance.prototype, propertyName, {
+            get: function() {
+                return getter.call(this, methodNames.instance);
+            }
+        });
+    }
 }
 
 module.exports = function(propertyName, createCustomFunction){
     return function(models) {
-        models = models.DAO ? [models] : models;
+        models = models.DAO || models.Instance ? [models] : models;
 
         if (typeof models !== 'object' || !Object.keys(models).length) {
             throw new Error('Not a sequelize model');
         }
 
         for (var key in models) {
-            if (!models[key].DAO) {
+            if (!models[key].DAO && !models[key].Instance) {
                 throw new Error('Not a sequelize model');
             }
             addCustomMethods(models[key], propertyName, createCustomFunction);
