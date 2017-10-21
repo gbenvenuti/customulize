@@ -1,4 +1,4 @@
-var test = require('grape'),
+var test = require('tape'),
     propertyName = 'fakeProp',
     runTests = require('./runTests');
 
@@ -45,3 +45,4 @@ function createTestFunction(model, method) {
 runTests.sequelizeV1(test, propertyName, createTestFunction, successTestV1, errorTestV1);
 runTests.sequelizeV2(test, propertyName, createTestFunction, successTestV2, errorTestV2);
 runTests.sequelizeV3(test, propertyName, createTestFunction, successTestV2, errorTestV2);
+runTests.sequelizeV4(test, propertyName, createTestFunction, successTestV2, errorTestV2);
