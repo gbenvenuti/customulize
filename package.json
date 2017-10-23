@@ -23,6 +23,7 @@
   "homepage": "https://github.com/gbenvenuti/customulize",
   "devDependencies": {
     "grape": "^1.0.0",
-    "mockery": "^1.4.0"
+    "mockery": "^1.4.0",
+    "tape": "^4.8.0"
   }
 }

@@ -28,8 +28,9 @@ function promiseCreate() {
 }
 
 function runTests(test, propertyName, testFunction, successTest, errorTest, entityCreate, instanceProperty){
-    function SequelizeModel() {
+    function SequelizeModel(modelName) {
         var model = this;
+        var __modelName = modelName;
         this[instanceProperty] = function(){};
 
         methodNames.instance.forEach(function(method) {
@@ -42,10 +43,30 @@ function runTests(test, propertyName, testFunction, successTest, errorTest, enti
         SequelizeModel.prototype[method] = entityCreate();
     });
 
+    function define(modelName) {
+        if (instanceProperty) {
+            return new SequelizeModel(modelName);
+        } else {
+            function SequelizeModelV4() {
+                var model = this;
+                this.__modelName = modelName;
+            }
+
+            methodNames.instance.forEach((method) => {
+                SequelizeModelV4.prototype[method] = entityCreate();
+            });
+            methodNames.class.forEach((method) => {
+                SequelizeModelV4[method] = entityCreate();
+            });
+
+            return SequelizeModelV4;
+        }
+    }
+
     function createModels(names) {
         var models = {};
         for (var key in names) {
-            models[names[key]] = new SequelizeModel();
+            models[names[key]] = define(key);
         }
         return models;
     }
@@ -59,12 +80,12 @@ function runTests(test, propertyName, testFunction, successTest, errorTest, enti
         });
     }
 
-    function instanceMethodTester(t, model) {
+    function instanceMethodTester(t, instance) {
         t.plan(methodNames.instance.length * 2);
 
         methodNames.instance.forEach(function(method) {
-            successTest(t, model, method);
-            errorTest(t, model, method);
+            successTest(t, instance, method);
+            errorTest(t, instance, method);
         });
     }
 
@@ -75,7 +96,8 @@ function runTests(test, propertyName, testFunction, successTest, errorTest, enti
         t.equal(typeof customulize, 'function',  'customulize is a function');
     });
 
-    test('multi model', function () {
+    test('multi model', function (t) {
+        t.end();
         var customulize = getCleanTestObject(),
             modelNames = ['Account', 'User'],
             models = createModels(modelNames);
@@ -88,15 +110,20 @@ function runTests(test, propertyName, testFunction, successTest, errorTest, enti
             });
 
             test('testing instanceMethod success/error for model ' + modelName, function(t) {
-                instanceMethodTester(t, models[modelName].DAOInstance);
+                if (instanceProperty) {
+                    instanceMethodTester(t, models[modelName].DAOInstance);
+                } else {
+                    instanceMethodTester(t, new models[modelName]());
+                }
             });
         });
 
     });
 
-    test('single model', function () {
+    test('single model', function (t) {
+        t.end();
         var customulize = getCleanTestObject(),
-            model = new SequelizeModel();
+            model = define('singleModel');
 
         customulize(propertyName, testFunction)(model);
 
@@ -105,12 +132,16 @@ function runTests(test, propertyName, testFunction, successTest, errorTest, enti
         });
 
         test('testing instanceMethod success/error for single model ', function(t) {
-            instanceMethodTester(t, model.DAOInstance);
+            if (instanceProperty) {
+                instanceMethodTester(t, model.DAOInstance);
+            } else {
+                instanceMethodTester(t, new model());
+            }
         });
     });
 
     test('errors with a invalid model', function (t) {
-        t.plan(2);
+        t.plan(3);
 
         var customulize = getCleanTestObject()(propertyName, testFunction);
 
@@ -121,6 +152,10 @@ function runTests(test, propertyName, testFunction, successTest, errorTest, enti
         t.throws(function() {
             customulize({ my: 'property'});
         }, 'got an exception on non empty object');
+
+        t.throws(function() {
+            customulize(1);
+        }, 'got an exception on non-object');
     });
 }
 
@@ -136,8 +171,13 @@ function runTestsSequelizeV3(test, propertyName, testFunction, successTest, erro
     runTests(test, propertyName, testFunction, successTest, errorTest, promiseCreate, 'Instance');
 }
 
+function runTestsSequelizeV4(test, propertyName, testFunction, successTest, errorTest){
+    runTests(test, propertyName, testFunction, successTest, errorTest, promiseCreate);
+}
+
 module.exports = {
     sequelizeV1: runTestsSequelizeV1,
     sequelizeV2: runTestsSequelizeV2,
-    sequelizeV3: runTestsSequelizeV3
+    sequelizeV3: runTestsSequelizeV3,
+    sequelizeV4: runTestsSequelizeV4,
 };
