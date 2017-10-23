@@ -1,12 +1,12 @@
-#customulize
+# customulize
 
 Add arbitrary custom functions to sequelize models
 
-##Installation
+## Installation
 
     npm install customulize
 
-##usage
+## usage
 
     var customulize = require('customulize');
 
@@ -37,7 +37,7 @@ Add arbitrary custom functions to sequelize models
         });
     });
 
-##kgo
+## kgo
 
 customulize allows you to create a lazy calling pattern, eg:
 
